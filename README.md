@@ -11,8 +11,6 @@ It implements the two methods of the paper and every experiment, table and figur
 
 ## Installation
 
-The code requires Python 3.10 or later.
-
 ```bash
 pip install -r requirements.txt
 ```
@@ -31,9 +29,9 @@ python -m tests.test_core              # unit checks of the core identities
 The unit checks verify four things:
 
 - LPM equals the mean leaf agreement with the training points.
-- The stored node counts match the counts obtained by passing the training set through the model.
+- Without row subsampling, the node counts stored in the model match the counts obtained by passing the training set through it.
 - WLACP with a constant kernel reduces to split conformal prediction.
-- The baseline interval methods return intervals of the expected shape.
+- Mondrian conformal prediction and CV+ return intervals of the expected shape.
 
 ## Reproducing the paper
 
@@ -61,7 +59,7 @@ Step 1 writes the summary tables of the core datasets to `results/tables/`, and 
 - `figures/`: each figure as a 600-dpi PNG, with its caption in a `.txt` file of the same name.
 - `tables/`: one LaTeX file per table.
 
-Every value in the paper is computed from the stored result records. Nothing is transcribed by hand.
+Every number in the paper can be traced to the stored result records.
 
 ### Running single experiments
 
