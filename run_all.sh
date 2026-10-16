@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Full rebuttal run. Usage:
-#   N_JOBS=16 DATASETS=main bash run_all.sh        # nine datasets of the paper
-#   N_JOBS=16 DATASETS=all  bash run_all.sh        # all 19 regression tasks (option C1)
+# Runs every experiment and the aggregation. Usage:
+#   N_JOBS=16 DATASETS=main bash run_all.sh        # nine core datasets of the paper
+#   N_JOBS=16 DATASETS=all  bash run_all.sh        # all 19 regression tasks
 #   QUICK=1 bash run_all.sh                         # smoke test on small splits
 set -euo pipefail
 N_JOBS=${N_JOBS:-$(nproc)}
@@ -23,7 +23,7 @@ python -m experiments.e03_extended  $C                          # NGBoost, CV+, 
 python -m experiments.e07_noise --n_jobs "$N_JOBS" --out "$OUT" $EXTRA   # noise structure
 python -m experiments.e08_ring  --out "$OUT"                    # ring benchmark
 python -m experiments.e04_sensitivity $C --with_conformal       # partition sensitivity and tuned models
-python -m experiments.e09_timing --out "$OUT"                   # run alone: single-threaded timing
+python -m experiments.e09_timing --out "$OUT"                   # timing, best run on an idle machine
 
 python -m analysis.a01_tables --results "$OUT"
 python -m analysis.a02_stats  --results "$OUT"

@@ -279,7 +279,7 @@ def t_cpstats(a):
                      f"${i19.median_diff:+.3f}$ & {fp(i19.p_two_sided_holm)} & {int(q19.wins)}/19 & "
                      f"{fp(q19.p_two_sided_holm)} \\\\")
     body = r"""
-\begin{table}[!t]
+\begin{table}[!tb]
 \centering\footnotesize
 \caption{Dataset-level comparison of WLACP with the other interval methods. Wins count the datasets on which WLACP has the lower interval score (IS) or a Q1 coverage closer to 0.90. Median $\Delta$IS is the comparator's relative interval score minus that of WLACP. $p$ is the two-sided Wilcoxon $p$-value, on the 19 tasks Holm-adjusted over the 14 comparators. NCP is normalized conformal prediction, and NGBoost uses 100 trees or early stopping (ES).}\label{tbl:cpstats}
 \setlength{\tabcolsep}{1.6pt}
