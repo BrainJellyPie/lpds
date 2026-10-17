@@ -12,7 +12,7 @@ def data(n, seed=0):
     return X, X[:, 0] ** 2 + np.sin(X[:, 1]) + 0.3 * rng.normal(size=n)
 
 
-def test_identity_eq12():
+def test_lpm_equals_mean_leaf_agreement():
     """LPDS equals the mean leaf agreement with the training points."""
     X, y = data(1500)
     for lib in ("sklearn", "xgb", "lgbm"):

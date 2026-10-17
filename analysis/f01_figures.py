@@ -842,8 +842,8 @@ FIGS = ["ranking", "quartile", "partition", "shift", "heatmaps", "conformal", "c
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--results", default="results")
-    p.add_argument("--results_all", default="results_all")
+    p.add_argument("--results", default="rerun")
+    p.add_argument("--results_all", default="rerun_all")
     p.add_argument("--out", default="figures")
     p.add_argument("--only", default=None)
     a = p.parse_args()

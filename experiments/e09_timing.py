@@ -46,7 +46,7 @@ def timeit(fn, reps):
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--data_dir", default="data")
-    p.add_argument("--out", default="results")
+    p.add_argument("--out", default="rerun")
     p.add_argument("--reps", type=int, default=5)
     p.add_argument("--n_query", type=int, default=400)
     a = p.parse_args()

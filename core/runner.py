@@ -22,7 +22,7 @@ def base_parser(desc):
     p.add_argument("--seeds", default=",".join(map(str, SEEDS)))
     p.add_argument("--n_jobs", type=int, default=1)
     p.add_argument("--data_dir", default="data")
-    p.add_argument("--out", default="results")
+    p.add_argument("--out", default="rerun")
     p.add_argument("--quick", action="store_true",
                    help="small splits for a smoke test")
     p.add_argument("--overwrite", action="store_true")

@@ -136,7 +136,7 @@ def load(results, exp, group):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--results", default="results")
+    p.add_argument("--results", default="rerun")
     p.add_argument("--boot", type=int, default=1000)
     a = p.parse_args()
     out_dir = os.path.join(a.results, "tables")

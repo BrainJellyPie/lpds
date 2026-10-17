@@ -4,8 +4,8 @@
 #   N_JOBS=16 DATASETS=all OUT=rerun_all bash run_all.sh   # all 19 tasks (the paper runs
 #                                                   # only e01 to e03 on them)
 #   QUICK=1 bash run_all.sh                         # smoke test on small splits
-# The stored records of the paper are in results/ and results_all/; write new runs
-# to a different folder, since jobs whose output already exists are skipped.
+# Jobs whose output already exists are skipped, so an interrupted run resumes
+# where it stopped.
 set -euo pipefail
 N_JOBS=${N_JOBS:-$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 1)}
 DATASETS=${DATASETS:-main}

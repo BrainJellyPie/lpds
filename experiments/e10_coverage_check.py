@@ -4,7 +4,7 @@ fresh calibration and test samples are drawn repeatedly from the same
 heteroscedastic distribution with sparse and dense regions. Small
 calibration sizes make finite-sample effects visible.
 
-Output: results/e10_coverage_check/summary.json with mean coverage and its
+Output: <out>/e10_coverage_check/summary.json with mean coverage and its
 Monte Carlo standard error for every procedure and kernel.
 """
 import os
@@ -34,7 +34,7 @@ def main():
     p.add_argument("--n_cal", type=int, nargs="+", default=[20, 50, 200])
     p.add_argument("--n_test", type=int, default=20)
     p.add_argument("--alpha", type=float, default=0.1)
-    p.add_argument("--out", default="results")
+    p.add_argument("--out", default="rerun")
     a = p.parse_args()
     rng = np.random.default_rng(0)
     Xtr, ytr = sample(3000, rng)

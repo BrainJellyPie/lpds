@@ -44,7 +44,7 @@ def section(title, body):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--results", default="results")
+    p.add_argument("--results", default="rerun")
     p.add_argument("--results_all", default=None)
     a = p.parse_args()
     out = []

@@ -364,8 +364,8 @@ $n$ & """ + " & ".join(h for _, h in ck) + r""" & & \\
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--results", default="results")
-    p.add_argument("--results_all", default="results_all")
+    p.add_argument("--results", default="rerun")
+    p.add_argument("--results_all", default="rerun_all")
     p.add_argument("--data_dir", default="data")
     p.add_argument("--out", required=True)
     a = p.parse_args()

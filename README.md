@@ -1,10 +1,10 @@
 # Leaf Population Mass and WLACP for Deployed Gradient-Boosted Trees
 
-This repository contains the code, the data splits, the result records and the analysis scripts for the paper
+This repository contains the code, the data splits and the analysis scripts for the paper
 
 > M. Lee and D. Ryu, "Leaf Population Mass in Deployed Gradient-Boosted Trees: Error Ranking and Locally Adaptive Conformal Prediction Without Retraining" (manuscript under review).
 
-It implements the two methods of the paper and every experiment, table and figure reported in it.
+It implements the two methods and all experiments, tables and figures of the paper.
 
 - **Leaf population mass (LPM).** A reliability score for a fitted gradient-boosted decision tree (GBDT) ensemble. For a query, LPM averages over the trees the fraction of training points that share the query's leaf. It needs no refitting and no labels, and it can be computed from the node counts that scikit-learn, XGBoost and LightGBM store in their model files.
 - **Weighted leaf agreement conformal prediction (WLACP).** A localized split conformal procedure. It weights every calibration point by its per-tree normalized leaf agreement with the query and adjusts the level as in localized conformal prediction (Guan, *Biometrika*, 2023), which guarantees finite-sample marginal coverage.
@@ -17,7 +17,7 @@ cd lpds
 pip install -r requirements.txt
 ```
 
-The code was tested with Python 3.13 and the package versions recorded in `results/env.json`.
+The code was tested with Python 3.13, NumPy 2.5, SciPy 1.18, pandas 3.0, scikit-learn 1.9, XGBoost 3.4, LightGBM 4.7, NGBoost 0.5, statsmodels 0.15 and joblib 1.6. Every run records the exact versions in `<out>/env.json`.
 
 The 19 regression tasks with numerical features come from the tabular benchmark of Grinsztajn et al. (NeurIPS 2022). They are downloaded on first use from the Hugging Face dataset `inria-soda/tabular-benchmark` (folder `reg_num`) and cached in `data/`.
 
@@ -39,9 +39,7 @@ The unit checks verify four things:
 
 ## Reproducing the paper
 
-The folders `results/` (all experiments on the nine core datasets) and `results_all/` (experiments `e01` to `e03` on all 19 tasks) hold the result records of the paper. Step 3 below regenerates every number, figure and table of the paper from them in a few minutes, without rerunning any experiment. Table 1 is computed from the datasets themselves, which step 3 downloads to `data/` if they are not there yet.
-
-To rerun the experiments themselves, write to new folders (`run_all.sh` writes to `rerun/` by default). Jobs whose output already exists are skipped, so running into `results/` would reuse the stored records.
+Steps 1 and 2 run the experiments and write their result records to `rerun/` (all experiments on the nine core datasets) and `rerun_all/` (experiments `e01` to `e03` on all 19 tasks). Step 3 computes every number, figure and table of the paper from these records in a few minutes. Table 1 is computed from the datasets themselves, which are downloaded to `data/` if they are not there yet.
 
 ```bash
 # 1. All experiments on the nine core datasets, five random splits each
@@ -54,22 +52,22 @@ done
 python -m analysis.a01_tables --results rerun_all
 python -m analysis.a02_stats  --results rerun_all
 
-# 3. Numbers, figures and tables of the paper (use rerun and rerun_all after a rerun)
-python -m analysis.a03_key_numbers   --results results --results_all results_all
-python -m analysis.a04_paper_numbers --results results --results_all results_all
-python -m analysis.f01_figures       --results results --results_all results_all --out figures
-python -m analysis.a05_latex_tables  --results results --results_all results_all --out tables
+# 3. Numbers, figures and tables of the paper
+python -m analysis.a03_key_numbers   --results rerun --results_all rerun_all
+python -m analysis.a04_paper_numbers --results rerun --results_all rerun_all
+python -m analysis.f01_figures       --results rerun --results_all rerun_all --out figures
+python -m analysis.a05_latex_tables  --results rerun --results_all rerun_all --out tables
 ```
 
 Step 1 writes the summary tables of the core datasets to `rerun/tables/`. Step 3 writes the remaining output, and its commands must run in the order shown, since `f01_figures` and `a05_latex_tables` read the output of `a04_paper_numbers`:
 
-- `results/tables/key_numbers.md`: a summary of the main results.
-- `results/tables/paper_numbers.json`: every number quoted in the text that is not already in a table.
-- `results/tables/wlacp_vs_all.csv` and `results_all/tables/wlacp_vs_all.csv`: the dataset-level comparison of WLACP with every interval method.
+- `rerun/tables/key_numbers.md`: a summary of the main results.
+- `rerun/tables/paper_numbers.json`: every number quoted in the text that is not already in a table.
+- `rerun/tables/wlacp_vs_all.csv` and `rerun_all/tables/wlacp_vs_all.csv`: the dataset-level comparison of WLACP with every interval method.
 - `figures/`: each figure as a 600-dpi PNG, with its caption in a `.txt` file of the same name. The figures use the Inter typeface; without it, matplotlib falls back to its default font.
 - `tables/`: one LaTeX file per result table (Tables 1 and 3 to 10).
 
-Every number in the paper can be traced to the stored result records.
+Every number in the paper is computed by these scripts from the result records.
 
 ### Running single experiments
 
@@ -113,7 +111,7 @@ Analysis scripts:
 | `f01_figures` | All figures of the paper. |
 | `a05_latex_tables` | All result tables of the paper in LaTeX. |
 | `a06_export_splits` | Writes the row indices of every data split to `splits/`. |
-| `a00_timing` | Run time of each experiment, read from the stored records. |
+| `a00_timing` | Run time of each experiment, read from the result records. |
 
 ## Repository layout
 
@@ -123,11 +121,8 @@ core/          data loading and splits, models, leaf structure, risk scores,
 experiments/   one script per experiment (e01 to e10)
 analysis/      aggregation, statistics, figures and tables
 tests/         unit checks
-results/       result records and summary tables, nine core datasets
-results_all/   result records and summary tables of e01 to e03, all 19 tasks
 splits/        row indices of the training, validation, calibration and
                test sets for every dataset and random split
-figures/       the figures of the paper with their captions
 run_all.sh     runs every experiment and the aggregation for one dataset group
 ```
 
@@ -145,9 +140,9 @@ Key files:
 - **Other libraries.** XGBoost uses the same depth and a minimum child weight of 20. LightGBM grows 16 leaves per tree.
 - **Coverage level.** Intervals target 90% coverage.
 
-## Names in the code and result files
+## Names in the code and result records
 
-| In the code and result files | In the paper |
+| In the code and result records | In the paper |
 |---|---|
 | `LPDS` | LPM (leaf population mass) |
 | `LPDS_stored` | LPM from the node counts stored in the model |

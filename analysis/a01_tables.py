@@ -71,7 +71,7 @@ def save(name, tables, out_dir):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--results", default="results")
+    p.add_argument("--results", default="rerun")
     a = p.parse_args()
     out = os.path.join(a.results, "tables")
 

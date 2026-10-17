@@ -13,7 +13,7 @@ import pandas as pd
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--results", default="results")
+    p.add_argument("--results", default="rerun")
     p.add_argument("--n_jobs", type=int, default=16)
     p.add_argument("--n_datasets", type=int, default=9)
     p.add_argument("--n_seeds", type=int, default=5)
