@@ -1,8 +1,8 @@
-"""LaTeX tables of the revised manuscript, generated from the result records.
+"""LaTeX tables of the paper, generated from the result records.
 
   python -m analysis.a05_latex_tables --results results --results_all results_all --out <dir>
 
-Writes one .tex file per table into <dir>; the manuscript inputs them.
+Writes one .tex file per table into <dir>; the paper inputs them.
 """
 import argparse
 import json
@@ -48,7 +48,7 @@ DOMAIN = {"Ailerons": "Aircraft control", "elevators": "Aircraft control", "cpu_
           "houses": "Real estate", "MiamiHousing2016": "Real estate", "pol": r"Telecommunications~\cite{weiss1995rule}",
           "sulfur": "Chemical process", "Brazilian_houses": "Real estate", "abalone": "Marine biology",
           "delays_zurich_transport": "Public transport", "diamonds": "Retail pricing",
-          "house_16H": "Census", "house_sales": "Real estate", "medical_charges": "Health-care billing",
+          "house_16H": "Census", "house_sales": "Real estate", "medical_charges": "Health care billing",
           "nyc-taxi-green-dec-2016": "Urban mobility", "wine_quality": "Food chemistry",
           "yprop_4_1": "Anonymized features"}
 
@@ -68,7 +68,7 @@ def t_datasets(a):
     body = r"""
 \begin{table}[!t]
 \centering\footnotesize
-\caption{Regression tasks with numerical features in the tabular benchmark of Grinsztajn et al.~\cite{grinsztajn2022tree}. The nine core datasets form the main testbed, and the remaining ten extend the error-ranking, conformal and cross-library analyses to the full benchmark. Active is the fraction of features used in at least one split of the default model (mean over five seeds).}\label{tbl:datasets}
+\caption{Regression tasks with numerical features in the tabular benchmark of Grinsztajn et al.~\cite{grinsztajn2022tree}. Active is the fraction of features used in at least one split of the default model (mean over five seeds).}\label{tbl:datasets}
 \setlength{\tabcolsep}{2pt}
 \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lrrrrl@{}}
 \toprule
@@ -137,10 +137,10 @@ def t_stats(a):
     body = r"""
 \begin{table*}[!t]
 \centering\footnotesize
-\caption{Dataset-level comparison of """ + L + r""" with each baseline, with datasets as units (per-dataset means over five seeds). Wins count the datasets on which """ + L + r""" attains the higher Spearman correlation or the higher PRR. $p$ is the two-sided Wilcoxon signed-rank $p$-value; on the 19 tasks it is Holm-adjusted over the ten comparators. Mean $\Delta\rho$ is the mean difference in Spearman correlation between """ + L + r""" and the comparator, and the 95\% CI is its hierarchical bootstrap interval, resampling datasets and then seeds. Baselines below the line use labels or the prediction.}\label{tbl:stats}
+\caption{Dataset-level comparison of """ + L + r""" with each baseline, with datasets as units (per-dataset means over five seeds). Wins count the datasets on which """ + L + r""" attains the higher Spearman correlation or the higher PRR. $p$ is the two-sided Wilcoxon signed-rank $p$-value; on the 19 tasks it is Holm-adjusted over the ten comparators. Mean {\unboldmath$\Delta\rho$} is the mean difference in Spearman correlation between """ + L + r""" and the comparator, and the 95\% CI is its hierarchical bootstrap interval, resampling datasets and then seeds. Baselines below the line use labels or the prediction.}\label{tbl:stats}
 \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lcccc|cccccc@{}}
 \toprule
- & \multicolumn{4}{c|}{9 core datasets} & \multicolumn{6}{c}{All 19 datasets} \\
+ & \multicolumn{4}{c|}{9 core datasets} & \multicolumn{6}{c}{All 19 tasks} \\
  & \multicolumn{2}{c}{Spearman} & \multicolumn{2}{c|}{PRR} & \multicolumn{4}{c}{Spearman} & \multicolumn{2}{c}{PRR} \\
 Comparator & Wins & $p$ & Wins & $p$ & Wins & Mean $\Delta\rho$ & 95\% CI & $p_\text{Holm}$ & Wins & $p_\text{Holm}$ \\
 \midrule
@@ -215,7 +215,7 @@ Dataset & scikit-learn & XGBoost & LightGBM & LightGBM-4 \\
     write(a.out, "tbl_impl.tex", body)
 
 
-CPN = [("Split", "Split CP"), ("WLACP_submitted", "Weighted quantile"),
+CPN = [("Split", "Split CP"), ("WQ", "Weighted quantile"),
        ("WLACP_LCP_la_g1", "WLACP, raw LA"), ("WLACP_LCP_la_norm_g1", r"\textbf{WLACP}"),
        ("WLACP_LCP_auto", "WLACP, kernel by validation"),
        ("Mondrian_LPDS4", f"Mondrian, {L} quartiles"), ("LoBoost", "LoBoost"),
@@ -244,7 +244,7 @@ def t_conformal(a):
     body = r"""
 \begin{table*}[!t]
 \centering\footnotesize
-\caption{Prediction intervals at the 90\% level (mean over datasets of five-seed means). Q1 and Q4 are the lowest and highest """ + L + r""" quartiles of the test set with thresholds fixed on the validation split, kNN-Q4 is the quartile of test points farthest from the training set in kNN distance, and WSC is the worst-slab coverage. IS is the interval score, Width the mean width and Width Q1 the mean width on Q1, each divided by that of split CP. Methods below the line refit the model, and kNN-Q4 and WSC are evaluated for the methods that keep it.}\label{tbl:conformal}
+\caption{Prediction intervals at the 90\% level (mean over datasets of five-seed means). Q1 and Q4 are the lowest and highest """ + L + r""" quartiles of the test set with thresholds fixed on the validation split, kNN-Q4 is the quartile of test points farthest from the training set in kNN distance, and WSC is the worst-slab coverage. IS is the interval score, Width the mean width and Width Q1 the mean width on Q1, each divided by that of split conformal prediction (split CP). Methods below the line refit the model, and kNN-Q4 and WSC are evaluated for the methods that keep it.}\label{tbl:conformal}
 \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lcccccccc|cc@{}}
 \toprule
  & \multicolumn{8}{c|}{9 core datasets} & \multicolumn{2}{c}{All 19} \\
@@ -262,7 +262,7 @@ def t_cpstats(a):
     def get(res):
         return pd.read_csv(os.path.join(res, "tables", "wlacp_vs_all.csv"))
     s9, s19 = get(a.results), get(a.results_all)
-    order = ["Split", "WLACP_submitted", "WLACP_LCP_la_g1", "Mondrian_LPDS4", "LoBoost", "LCP_RBF", "NCP_LPDS",
+    order = ["Split", "WQ", "WLACP_LCP_la_g1", "Mondrian_LPDS4", "LoBoost", "LCP_RBF", "NCP_LPDS",
              "NCP_ErrModel", "NCP_IBUG", "IBUG_Gaussian", "CQR", "CVplus", "NGBoost100", "NGBoostES"]
     lab = dict((k, v) for k, v in [x for x in CPN if x is not None])
     lab.update({"Mondrian_LPDS4": "Mondrian", "NCP_LPDS": f"NCP, {L}", "NCP_ErrModel": "NCP, error model",
@@ -281,7 +281,7 @@ def t_cpstats(a):
     body = r"""
 \begin{table}[!tb]
 \centering\footnotesize
-\caption{Dataset-level comparison of WLACP with the other interval methods. Wins count the datasets on which WLACP has the lower interval score (IS) or a Q1 coverage closer to 0.90. Median $\Delta$IS is the comparator's relative interval score minus that of WLACP. $p$ is the two-sided Wilcoxon $p$-value, on the 19 tasks Holm-adjusted over the 14 comparators. NCP is normalized conformal prediction, and NGBoost uses 100 trees or early stopping (ES).}\label{tbl:cpstats}
+\caption{Dataset-level comparison of WLACP with the other interval methods. Wins count the datasets on which WLACP has the lower interval score (IS) or a Q1 coverage closer to 0.90. Median {\unboldmath$\Delta$}IS is the comparator's relative interval score minus that of WLACP. $p$ is the two-sided Wilcoxon $p$-value, on the 19 tasks Holm-adjusted over the 14 comparators. NCP is normalized conformal prediction, and NGBoost uses 100 trees or early stopping (ES).}\label{tbl:cpstats}
 \setlength{\tabcolsep}{1.6pt}
 \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lccccccc@{}}
 \toprule
@@ -300,7 +300,7 @@ def t_mc(a):
     mc = json.load(open(os.path.join(a.results, "e10_coverage_check", "summary.json")))
     ns = sorted(mc, key=int)
     rows = [("split", "Split CP"), ("split_uncorrected", r"Split CP, rank $\lceil n(1-\alpha)\rceil$"),
-            ("wlacp_submitted", "WQ, raw LA"),
+            ("wq", "WQ, raw LA"),
             ("wlacp_testmass_la_g1", "WQ + test mass, raw LA"),
             ("wlacp_testmass_la_norm_g1", "WQ + test mass, normalized"),
             ("wlacp_lcp_la_g1", "WLACP, raw LA"), ("wlacp_lcp_la_norm_g1", r"\textbf{WLACP}, normalized LA"),
@@ -312,7 +312,7 @@ def t_mc(a):
     body = r"""
 \begin{table}[!t]
 \centering\footnotesize
-\caption{Marginal coverage at the 90\% level in the Monte Carlo study (mean over 2000 independent replications of the calibration and test sets for each calibration-set size $n$; every Monte Carlo standard error is at most $""" + f"{se_max:.4f}" + r"""$). WQ is the weighted quantile.}\label{tbl:mc}
+\caption{Marginal coverage at the 90\% level in the Monte Carlo study (mean over 2000 independent replications of the calibration and test sets for each calibration-set size $n$; every Monte Carlo standard error is at most $""" + f"{se_max:.4f}" + r"""$). CP is conformal prediction and WQ the weighted quantile.}\label{tbl:mc}
 \begin{tabular*}{\linewidth}{@{\extracolsep{\fill}}lccc@{}}
 \toprule
 Procedure & """ + " & ".join(f"$n={n}$" for n in ns) + r""" \\
@@ -336,7 +336,7 @@ def t_timing(a):
         lines.append(f"{int(n)} & " + " & ".join(f"{t['by_N'][n][k]:.2f}" if t['by_N'][n][k] < 100 else f"{t['by_N'][n][k]:.0f}"
                                                 for k, _ in keys) + r" \\")
     nc = sorted(t["by_ncal"], key=int)
-    ck = [("WLACP_submitted", "Weighted quantile"), ("WLACP_LCP", "WLACP"), ("Mondrian", "Mondrian"),
+    ck = [("WQ", "Weighted quantile"), ("WLACP_LCP", "WLACP"), ("Mondrian", "Mondrian"),
           ("LoBoost_fit", "LoBoost fit"), ("LoBoost_assign", "LoBoost assign"), ("LA_matrix_MB", "Kernel (MB)")]
     lines2 = []
     for n in nc:

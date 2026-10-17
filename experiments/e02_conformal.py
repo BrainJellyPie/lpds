@@ -1,14 +1,20 @@
-"""E02. Conformal intervals without refitting (sklearn main model).
+"""E02. Conformal intervals that keep the deployed model (scikit-learn main
+model).
 
-Covers: R1-Q2 and R2-5(a)(b) level-adjusted WLACP with finite-sample
-marginal coverage; R2-5(c) kernel ablation (per-tree normalization,
-sharpness) and effective sample size; R2-6(a) marginal coverage, per-quartile
-coverage and width, worst-slab coverage, coverage on a subgroup defined
-independently of LPDS (kNN-distance quartile), interval score; R2-6(b)
-Mondrian CP on LPDS quartiles, normalized CP with LPDS / error-model / IBUG
-scale, localized CP with an RBF kernel, LoBoost; R1-Q1 IBUG intervals.
+Methods: split conformal prediction, the plain weighted quantile with and
+without the test-point mass, WLACP with four leaf-agreement kernels (raw,
+per-tree normalized, squared and fourth power) and with a kernel chosen on
+the validation split, Mondrian conformal prediction on LPM quartiles,
+normalized conformal prediction with an LPM, error-model or IBUG scale,
+localized conformal prediction with an RBF kernel, LoBoost, and the Gaussian
+intervals of IBUG.
+Metrics: marginal coverage, coverage and width per LPM quartile, coverage on
+the quartile of test points farthest from the training set in kNN distance
+(a subgroup defined without LPM), worst-slab coverage, the interval score,
+effective sample sizes of the kernel weights and the fraction of unbounded
+intervals.
 
-LPDS quartile thresholds and all tuned hyperparameters come from the
+LPM quartile thresholds and all tuned hyperparameters come from the
 validation split, so every procedure is fixed before calibration.
 """
 import os
@@ -41,7 +47,7 @@ def job(ds, seed, args):
     knn_te = geo.all(c.X_test, c.std(c.X_test))["kNN"]
     lp_te = c.lpds["test"]
     groups = {f"q{k + 1}": g_te == k for k in range(4)}
-    groups["low_testq"] = lp_te <= np.quantile(lp_te, 0.25)   # submitted definition
+    groups["low_testq"] = lp_te <= np.quantile(lp_te, 0.25)   # lowest 25% of test points
     groups["knn_q4"] = knn_te > np.quantile(knn_val, 0.75)
     Xw = c.std(c.X_test)
     y_range = c.y_train.max() - c.y_train.min()
@@ -80,7 +86,7 @@ def job(ds, seed, args):
                 "zero_weight_frac": float(np.mean(Htc.sum(axis=1) <= 0)),
                 "max_weight_mean": Htc.max(axis=1).mean()}
         if kind == "la" and g == 1.0:
-            evaluate("WLACP_submitted", *C.sym(p_te, C.wlacp_submitted(r_cal, Htc, a)), diag)
+            evaluate("WQ", *C.sym(p_te, C.weighted_quantile(r_cal, Htc, a)), diag)
         evaluate(f"WLACP_testmass_{tag}", *C.sym(p_te, C.wlacp_testmass(r_cal, Htc, htt, a)))
         qt = C.wlacp_lcp(r_cal, Hcc, Htc, htt, a)
         lcp_q[tag] = qt

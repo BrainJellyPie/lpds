@@ -1,13 +1,10 @@
-"""E08. Two-dimensional ring benchmark with a fully specified generator
-(R1-Q3, R2-7(e), Figure 4).
+"""E08. Two-dimensional ring benchmark (Fig. 9 of the paper).
 
 Training and surface-test points: radius uniform on [R_IN, R_OUT], angle
 uniform on [0, 2 pi). Interior points (hollow region): radius uniform on
 [0, R_HOLE]. Target: y = sin(3 theta) + 0.5 r + N(0, NOISE^2).
 Model: the main scikit-learn configuration of Table 2.
-If the original generator of the submitted Figure 4 is available, set the
-constants below to its values; otherwise these values define the benchmark
-for the revised manuscript.
+The constants below define the benchmark of the paper.
 """
 import os
 os.environ.setdefault("OMP_NUM_THREADS", "1")

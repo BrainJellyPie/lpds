@@ -3,12 +3,12 @@
 ModelView exposes, for scikit-learn, XGBoost and LightGBM:
   leaves(X)            leaf id per tree, shape (n, T)
   n_ids                number of leaf-id slots per tree
-  stored_counts()      per-leaf counts stored in the model file
+  stored_counts_flat() per-leaf counts stored in the model file
                        (scikit-learn n_node_samples, XGBoost cover,
                        LightGBM leaf_count); these are in-bag counts
-  leaf_values()        per-leaf output of each tree (shrinkage included)
+  leaf_values_flat()   per-leaf output of each tree (shrinkage included)
   staged(X, iters)     predictions of the truncated ensembles
-  active_features(d)   features used in at least one split
+  active_feature_fraction(d)   fraction of features used in at least one split
 """
 import numpy as np
 

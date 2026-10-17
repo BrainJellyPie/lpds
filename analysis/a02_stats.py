@@ -1,10 +1,10 @@
-"""Dataset-level statistics (R2-3).
+"""Dataset-level statistics.
 
 For the Spearman correlation and the PRR of e01, and for the low-quartile
 coverage of e02:
   * Wilcoxon signed-rank tests on per-dataset means (datasets as units),
-    one-sided in the direction fixed before the analysis (LPDS above the
-    comparator) and two-sided, with Holm adjustment over comparators;
+    one-sided in the direction fixed before the analysis (reference above
+    the comparator) and two-sided, with Holm adjustment over comparators;
   * hierarchical bootstrap CI of the grand-mean difference (resample
     datasets, then seeds within each dataset);
   * linear mixed model on the per-(dataset, seed) differences with a random
@@ -16,12 +16,15 @@ import argparse
 import glob
 import json
 import os
+import warnings
 
 import numpy as np
 import pandas as pd
 from scipy.stats import rankdata, wilcoxon
 
-from core.config import DISPLAY
+from core.config import ALPHA, DISPLAY
+
+TARGET = 1 - ALPHA  # nominal coverage
 
 COMPARATORS = ["IsoForest", "AA-Range", "Mahalanobis", "kNN", "LOF", "LeafVar",
                "AbsPred", "VirtualEns", "IBUG", "ErrModel"]
@@ -52,9 +55,14 @@ def hier_boot(diff, B=10000, seed=0):
 
 
 def mixed(diff):
+    """Random-intercept model of the seed-level differences, datasets as groups.
+    Boundary and convergence warnings of statsmodels are silenced, since a zero
+    between-dataset variance is a valid fit here."""
     try:
         import statsmodels.formula.api as smf
-        m = smf.mixedlm("value ~ 1", diff, groups=diff["dataset"]).fit(reml=True)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            m = smf.mixedlm("value ~ 1", diff, groups=diff["dataset"]).fit(reml=True)
         ci = m.conf_int().loc["Intercept"].to_numpy()
         return float(m.params["Intercept"]), float(ci[0]), float(ci[1]), float(m.pvalues["Intercept"])
     except Exception:  # pragma: no cover
@@ -141,7 +149,7 @@ def main():
     cp = load(a.results, "e02_conformal", "cp")
     if len(cp):
         cp = cp.assign(value=np.where(cp.metric.str.startswith("cov_"),
-                                      -np.abs(cp.value - 0.9), cp.value))
+                                      -np.abs(cp.value - TARGET), cp.value))
         # interval score in units of the split-CP interval score of the same
         # (dataset, seed), so that datasets with different target scales are
         # comparable
@@ -159,7 +167,7 @@ def main():
         res = pd.concat(parts, ignore_index=True)
         res.to_csv(os.path.join(out_dir, "stats_dataset_level.csv"), index=False)
         with open(os.path.join(out_dir, "stats_dataset_level.md"), "w") as f:
-            f.write("cov_q1 comparisons use -|coverage - 0.9| (closer to target is "
+            f.write(f"cov_q1 comparisons use -|coverage - {TARGET:g}| (closer to target is "
                     "better); is_all is the interval score relative to split CP "
                     "(lower is better).\n\n")
             f.write(res.round(4).to_markdown(index=False))

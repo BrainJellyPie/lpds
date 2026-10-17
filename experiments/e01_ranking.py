@@ -1,11 +1,18 @@
-"""E01. Error ranking under the main protocol (sklearn, Table 2 settings).
+"""E01. Error ranking under the main protocol (scikit-learn model with the
+settings of Table 2 of the paper).
 
-Covers: R2-2(a) rejection curves and PRR, R2-2(b) no-retraining baselines,
-R2-2(c) labeled error model, R1-Q1 / R2-1 IBUG and virtual ensembles,
-R2-7(a) model accuracy, R2-4 active-feature fraction and main-shift AUROC,
-R2-7(f) contribution-weighted LPDS, R2-7(g) LPDS from stored counts,
-R2-8(a) / minor 2 quartile errors. Per-point arrays are stored for the
-bootstrap and mixed-model analysis of R2-3.
+For LPM (named LPDS in the code) and every baseline risk score, computes the
+Spearman correlation with the absolute error, the prediction rejection ratio
+and rejection curves. The baselines are the axis-aligned range check,
+Isolation Forest, Mahalanobis distance, kNN distance, LOF, virtual ensembles,
+the magnitude of the prediction, the within-leaf target variance, IBUG and an
+error model fitted to the calibration residuals, with and without LPM as a
+feature. Also records model accuracy, the active-feature fraction, LPM from
+the node counts stored in the model, tree-weighted variants of LPM, the MAE
+per LPM quartile and the AUROC for the main extrapolation shift. Per-point
+arrays are stored for the per-dataset bootstrap intervals of
+analysis/a02_stats.py and the stored-count check of
+analysis/a04_paper_numbers.py.
 """
 import os
 os.environ.setdefault("OMP_NUM_THREADS", "1")

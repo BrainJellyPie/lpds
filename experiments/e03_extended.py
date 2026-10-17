@@ -1,11 +1,11 @@
-"""E03. Refitting references and cross-implementation study, on the same
-datasets and the same five seeds as the main tables (R2 minor 6).
+"""E03. Methods that refit the model, and the cross-library study, on the same
+datasets and random splits as the main tables.
 
-Refitting references (they fit additional models, unlike LPDS and WLACP):
-  NGBoost with 100 trees (submitted setting) and with early stopping on the
-  validation split (R2 minor 7), CV+ (R2-6(e), minor 8), CQR (R2-6(b)).
-Cross-implementation (R2-8(c)(d), minor 5): scikit-learn, XGBoost,
-  LightGBM (leaf-wise, no depth limit) and LightGBM with max_depth = 4.
+Methods that refit (unlike LPM and WLACP, they fit additional models):
+  NGBoost with 100 trees and with early stopping on the validation split,
+  CV+ with five folds, and conformalized quantile regression (CQR).
+Libraries: scikit-learn, XGBoost, LightGBM (leaf-wise, no depth limit) and
+  LightGBM with max_depth = 4.
 """
 import os
 os.environ.setdefault("OMP_NUM_THREADS", "1")

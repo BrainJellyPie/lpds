@@ -1,12 +1,14 @@
-"""E09. Inference-time scaling (R1-Q1, R2-1, Tables 12-14).
+"""E09. Inference-time scaling (Table 10 and Fig. 10 of the paper).
 
 Superconduct, T = 100, 400 queries. For training-set sizes N, the time to
 score the queries with LPDS (count lookups, and lookups plus leaf
 extraction), IBUG (affinity to every training point, top-k, spread), kNN
 distance, LOF, Isolation Forest and Mahalanobis. For calibration sizes,
-the time of submitted WLACP, level-adjusted WLACP (including the
+the time of the plain weighted quantile, WLACP (including the
 calibration-calibration kernel), Mondrian and LoBoost assignment.
-Run single-threaded; medians over repeats are stored.
+WLACP is timed with the raw leaf-agreement kernel; the normalized kernel
+only rescales the same sparse product per tree. Medians over repeats are
+stored; run on an otherwise idle machine.
 """
 import os
 os.environ.setdefault("OMP_NUM_THREADS", "1")
@@ -55,8 +57,7 @@ def main():
     cal_pool = perm[a.n_query:a.n_query + max(NCAL_LIST)]
     tr_pool = perm[a.n_query + max(NCAL_LIST):]
     Xq = X[q_idx]
-    res = {"machine": platform.processor() or platform.machine(),
-           "python": platform.python_version(), "by_N": {}, "by_ncal": {}}
+    res = {"python": platform.python_version(), "by_N": {}, "by_ncal": {}}
     for N in N_LIST:
         if N > len(tr_pool):
             continue
@@ -104,13 +105,13 @@ def main():
         g_q = np.searchsorted(np.quantile(lf.lpds(Lc), [.25, .5, .75]), lf.lpds(Lq))
 
         def sub():
-            C.wlacp_submitted(rc, lf.kernel(Lq, Lc), ALPHA)
+            C.weighted_quantile(rc, lf.kernel(Lq, Lc), ALPHA)
 
         def lcp():
             C.wlacp_lcp(rc, lf.kernel(Lc, Lc), lf.kernel(Lq, Lc), lf.self_kernel(Lq), ALPHA)
 
         lb = C.LoBoost(m_min=50).fit(Lc, rc, ALPHA)
-        r = {"WLACP_submitted": timeit(sub, a.reps),
+        r = {"WQ": timeit(sub, a.reps),
              "WLACP_LCP": timeit(lcp, max(1, a.reps // 2)),
              "Mondrian": timeit(lambda: C.mondrian(rc, g_c, g_q, ALPHA, 4), a.reps),
              "LoBoost_fit": timeit(lambda: C.LoBoost(m_min=50).fit(Lc, rc, ALPHA), a.reps),

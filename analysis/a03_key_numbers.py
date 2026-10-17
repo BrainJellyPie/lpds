@@ -1,5 +1,5 @@
-"""Key numbers for the response letter and the revised manuscript, computed
-directly from the stored records (no manual transcription).
+"""Summary of the main results in Markdown, computed directly from the stored
+records.
 
   python -m analysis.a03_key_numbers --results results [--results_all results_all]
 
@@ -85,7 +85,7 @@ def main():
                        ood[cols].mean().round(3).to_frame("AUROC").T.to_markdown()))
 
     cp = load(a.results, "e02_conformal", "cp")
-    methods = ["Split", "WLACP_submitted", "WLACP_LCP_la_g1", "WLACP_LCP_la_norm_g1",
+    methods = ["Split", "WQ", "WLACP_LCP_la_g1", "WLACP_LCP_la_norm_g1",
                "WLACP_LCP_auto", "Mondrian_LPDS4", "LoBoost", "LCP_RBF", "NCP_LPDS",
                "NCP_ErrModel", "NCP_IBUG", "IBUG_Gaussian"]
     rows = {}

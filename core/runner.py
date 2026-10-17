@@ -9,7 +9,7 @@ import traceback
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
-from .config import ALL19, EXT6, EXTRA10, MAIN9, SEEDS, SPLIT, SPLIT_QUICK
+from .config import ALL19, EXTRA10, MAIN9, SEEDS, SPLIT, SPLIT_QUICK
 from .data import load_dataset, make_split
 from .leaves import LeafStructure
 from .models import fit_model
@@ -18,7 +18,7 @@ from .models import fit_model
 def base_parser(desc):
     p = argparse.ArgumentParser(description=desc)
     p.add_argument("--datasets", default="main",
-                   help="main | all | extra | ext6 | comma-separated names")
+                   help="main | all | extra | comma-separated names")
     p.add_argument("--seeds", default=",".join(map(str, SEEDS)))
     p.add_argument("--n_jobs", type=int, default=1)
     p.add_argument("--data_dir", default="data")
@@ -30,7 +30,7 @@ def base_parser(desc):
 
 
 def resolve_datasets(arg):
-    table = {"main": MAIN9, "all": ALL19, "extra": EXTRA10, "ext6": EXT6}
+    table = {"main": MAIN9, "all": ALL19, "extra": EXTRA10}
     return table.get(arg, [s for s in arg.split(",") if s])
 
 
@@ -107,11 +107,13 @@ def _run_one(fn, ds, seed, args, path):
 
 
 def write_env(out_root):
-    """Record hardware and software versions (R1, comment 3)."""
+    """Record the Python and package versions once per output folder."""
     import importlib
     import platform
-    info = {"python": platform.python_version(), "platform": platform.platform(),
-            "processor": platform.processor(), "cpu_count": os.cpu_count()}
+    path = os.path.join(out_root, "env.json")
+    if os.path.exists(path):
+        return
+    info = {"python": platform.python_version(), "system": platform.system()}
     for m in ("numpy", "scipy", "pandas", "sklearn", "xgboost", "lightgbm",
               "ngboost", "statsmodels", "joblib"):
         try:
@@ -119,19 +121,20 @@ def write_env(out_root):
         except Exception:
             info[m] = None
     os.makedirs(out_root, exist_ok=True)
-    with open(os.path.join(out_root, "env.json"), "w") as f:
+    with open(path, "w") as f:
         json.dump(info, f, indent=1)
 
 
-def run(fn, exp_name, args, jobs=None):
+def run(fn, exp_name, args, jobs=None, prefetch=True):
     out_dir = os.path.join(args.out, exp_name)
     os.makedirs(out_dir, exist_ok=True)
     write_env(args.out)
     if jobs is None:
         jobs = [(ds, s) for ds in resolve_datasets(args.datasets)
                 for s in resolve_seeds(args.seeds)]
-    for ds in sorted({j[0] for j in jobs}):
-        load_dataset(ds, args.data_dir)   # download / cache once
+    if prefetch:
+        for ds in sorted({j[0] for j in jobs}):
+            load_dataset(ds, args.data_dir)   # download / cache once
     paths = [os.path.join(out_dir, f"{ds}_s{s}") for ds, s in jobs]
     if args.n_jobs == 1:
         status = [_run_one(fn, ds, s, args, p) for (ds, s), p in zip(jobs, paths)]
@@ -141,3 +144,5 @@ def run(fn, exp_name, args, jobs=None):
             delayed(_run_one)(fn, ds, s, args, p) for (ds, s), p in zip(jobs, paths))
     for (ds, s), st in zip(jobs, status):
         print(f"[{exp_name}] {ds} seed={s}: {st}")
+    if "error" in status:
+        raise SystemExit(f"[{exp_name}] some jobs failed; see the .err files in {out_dir}")

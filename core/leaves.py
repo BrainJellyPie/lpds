@@ -8,7 +8,7 @@ class LeafStructure:
 
     Leaf ids of tree t are offset into one flat index so that all trees share
     a single count vector. Counts are obtained by routing the full training
-    set (Definition 2 of the manuscript).
+    set (Definition 2 of the paper).
     """
 
     def __init__(self, n_ids, L_train):
@@ -26,7 +26,7 @@ class LeafStructure:
 
     # ---------------------------------------------------------------- LPDS
     def lpds(self, L, counts=None, tree_weights=None):
-        """LPDS (Eq. 4). With `counts` given (e.g. counts stored in the model
+        """LPM, named LPDS in the code (Eqs. 3 and 4 of the paper). With `counts` given (e.g. counts stored in the model
         file), each tree is normalized by its own total so that in-bag counts
         are expressed as fractions of that tree's subsample. `tree_weights`
         may be a vector (T,) or a per-query matrix (n, T)."""
@@ -68,9 +68,9 @@ class LeafStructure:
     def kernel(self, L1, L2, kind="la", gamma=1.0):
         """Leaf-agreement kernel between two sets of leaf assignments.
 
-        la       LA(x, z) = (1/T) sum_t 1[l_t(x) = l_t(z)]            (Eq. 6)
+        la       LA(x, z) = (1/T) sum_t 1[l_t(x) = l_t(z)]            (Eq. 5)
         la_norm  (1/T) sum_t 1[l_t(x) = l_t(z)] / n_t(l_t(x)), per-tree
-                 normalization by the training population of the shared leaf.
+                 normalization by the training population of the shared leaf (Eq. 6).
         Both are symmetric and depend only on the training split, so they are
         fixed with respect to calibration and test data. gamma sharpens.
         """

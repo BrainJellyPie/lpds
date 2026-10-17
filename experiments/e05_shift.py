@@ -1,12 +1,12 @@
 """E05. Binary detection of synthetic extrapolation as a function of shift
-magnitude and direction (R2-4, R2-7(c), R2-8(c), Figure 3).
+magnitude and direction (Figs. 4 and 5 of the paper).
 
 Source points are validation-split points (never used to fit the model).
 Directions PC1, PC2, PC3 and Diag use equal-displacement normalization (see
 core/shifts.py). Each shift is applied either to all features or only to
 continuous features (no binary or small-cardinality integer features).
 The leaf-based scores are computed for every implementation in --libs; the
-geometry baselines do not depend on the model.
+ambient-space baselines do not depend on the model.
 """
 import os
 os.environ.setdefault("OMP_NUM_THREADS", "1")

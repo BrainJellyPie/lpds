@@ -1,5 +1,5 @@
-"""Monte Carlo check of finite-sample marginal coverage (Proposition for the
-level-adjusted WLACP). A GBDT is fitted once on a training sample; then
+"""Monte Carlo check of finite-sample marginal coverage (Proposition 2 of
+the paper). A GBDT is fitted once on a training sample; then
 fresh calibration and test samples are drawn repeatedly from the same
 heteroscedastic distribution with sparse and dense regions. Small
 calibration sizes make finite-sample effects visible.
@@ -57,7 +57,7 @@ def main():
                 Hcc = leafs.kernel(Lc, Lc, kind, g)
                 htt = leafs.self_kernel(Lt, kind, g)
                 if kind == "la" and g == 1.0:
-                    res["wlacp_submitted"] = C.wlacp_submitted(rc, Htc, a.alpha)
+                    res["wq"] = C.weighted_quantile(rc, Htc, a.alpha)
                 res[f"wlacp_testmass_{tag}"] = C.wlacp_testmass(rc, Htc, htt, a.alpha)
                 res[f"wlacp_lcp_{tag}"] = C.wlacp_lcp(rc, Hcc, Htc, htt, a.alpha)
             for k, q in res.items():

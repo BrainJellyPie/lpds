@@ -1,10 +1,11 @@
 """Risk scores (higher value = higher expected error) and IBUG.
 
-Label-free at prediction time:
-  LPDS variants, Isolation Forest, AA-Range, Mahalanobis, kNN distance, LOF,
-  within-leaf target variance, |prediction|, virtual-ensemble variance, IBUG.
-Fitted on labeled calibration residuals:
-  ErrModel (small GBDT on |residual|), ErrModel+LPDS.
+Label-free: LPM (LPDS) and its variants, Isolation Forest, AA-Range (the
+  fraction of features outside their training range), Mahalanobis distance,
+  kNN distance, LOF, |prediction| and the virtual-ensemble variance.
+Using the training targets: within-leaf target variance and IBUG.
+Fitted on labeled calibration residuals: ErrModel (small GBDT on |residual|)
+  and ErrModel+LPDS.
 """
 import numpy as np
 from scipy.stats import norm
@@ -57,7 +58,7 @@ def ecdf(ref):
 
 
 def lpds_hybrids(lpds_q, lpds_val, geo, X_raw):
-    """LPDS combined with a range check (Reviewer 2, comment 4).
+    """LPM (LPDS) combined with a range check.
 
     LPDS+Range  queries with any feature outside the training range rank
                 above all in-range queries; within each group, by LPDS.

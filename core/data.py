@@ -21,7 +21,7 @@ def load_dataset(name, data_dir="data"):
     """Return X (n, d), y (n,), feature names.
 
     The target is the last column, rows with missing values are dropped and
-    all numeric features are kept, as in Table 1 of the manuscript. A cached
+    all numeric features are kept, as in Table 1 of the paper. A cached
     .npz copy is written next to the CSV for fast reloading.
     """
     cache = os.path.join(data_dir, f"{name}.npz")

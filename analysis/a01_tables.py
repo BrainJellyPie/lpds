@@ -8,6 +8,7 @@ import argparse
 import glob
 import json
 import os
+import re
 
 import numpy as np
 import pandas as pd
@@ -64,7 +65,8 @@ def save(name, tables, out_dir):
     with open(os.path.join(out_dir, name + ".md"), "w") as f:
         for title, t in tables:
             f.write(f"## {title}\n\n{t.to_markdown()}\n\n")
-            t.to_csv(os.path.join(out_dir, f"{name}__{title.replace(' ', '_')}.csv"))
+            slug = re.sub(r"[^0-9A-Za-z]+", "_", title).strip("_")
+            t.to_csv(os.path.join(out_dir, f"{name}__{slug}.csv"))
 
 
 def main():

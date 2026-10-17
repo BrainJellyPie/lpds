@@ -1,4 +1,4 @@
-"""E07. Target-noise experiments (R2-7(e), Section IV-C error structure).
+"""E07. Target-noise experiments (Section VI-G and Fig. 8 of the paper).
 
 (1) Bike_Sharing variants under the main protocol, five seeds. A smooth
     signal f is estimated once by 5-fold cross-fitted LightGBM on all rows.
@@ -7,9 +7,11 @@
                     distribution, heteroscedastic structure removed)
       gauss_<lam>   f + lam * sd(residual) * N(0, 1)
 (2) Synthetic data with controlled support and noise structure:
-    X ~ Beta(1.2, 3.0)^d (dense near 0, sparse near 1), Friedman-type signal,
-    noise that is homoscedastic, concentrated in the dense region, or
-    concentrated in the sparse region, at several levels.
+    n = 10000 points, X ~ Beta(1.2, 3.0)^8 (dense near 0, sparse near 1), and
+    the Friedman-type signal f = 10 sin(pi x1 x2) + 20 (x3 - 0.5)^2 + 10 x4
+    + 5 x5. Gaussian noise has standard deviation level * sd(f) times 1
+    (uniform), 0.25 + 1.5 * rank (dense) or 0.25 + 1.5 * (1 - rank) (sparse),
+    where rank in [0, 1] is the density rank of the point (1 = densest).
 """
 import os
 os.environ.setdefault("OMP_NUM_THREADS", "1")
@@ -17,6 +19,7 @@ os.environ.setdefault("OMP_NUM_THREADS", "1")
 import numpy as np
 from scipy.stats import beta as beta_dist
 from sklearn.model_selection import KFold
+from sklearn.preprocessing import StandardScaler
 
 from core import metrics as M
 from core.config import SPLIT, SPLIT_QUICK
@@ -25,7 +28,6 @@ from core.leaves import LeafStructure
 from core.models import fit_model
 from core.runner import base_parser, rec, run, resolve_seeds
 from core.scores import GeometryScores
-from sklearn.preprocessing import StandardScaler
 
 LAMS = [0.0, 0.25, 0.5, 1.0, 2.0]
 SYN_LEVELS = [0.0, 0.1, 0.25, 0.5, 1.0]
@@ -41,12 +43,12 @@ def evaluate(X, y, seed, quick, out, ds, variant, **extra):
     err = np.abs(yte - pred)
     sc = StandardScaler().fit(Xtr)
     geo = GeometryScores(Xtr, sc.transform(Xtr), seed)
+    # lpds_resid_corr duplicates spearman_LPDS and is kept to match the stored records
     m = {"r2": 1 - np.mean((yte - pred) ** 2) / np.var(yte),
          "spearman_LPDS": M.spearman(-lp, err), "prr_LPDS": M.prr(-lp, err),
          "lpds_resid_corr": M.spearman(-lp, err)}
     for name, s in geo.all(Xte, sc.transform(Xte)).items():
         m[f"spearman_{name}"] = M.spearman(s, err)
-    # how the noise level of the test points relates to their support
     rec(out, ds, seed, "noise", variant, m, **extra)
 
 
@@ -115,13 +117,5 @@ if __name__ == "__main__":
     a = p.parse_args()
     seeds = resolve_seeds(a.seeds)
     run(job_bike, "e07_noise_bike", a, jobs=[("Bike_Sharing_Demand", s) for s in seeds])
-
-    def job_syn_wrapped(ds, seed, args):
-        return job_syn(ds, seed, args)
-    import core.runner as R
-    _orig = R.load_dataset
-    R.load_dataset = lambda *x, **k: None         # no download for synthetic jobs
-    try:
-        run(job_syn_wrapped, "e07_noise_synthetic", a, jobs=[("synthetic", s) for s in seeds])
-    finally:
-        R.load_dataset = _orig
+    run(job_syn, "e07_noise_synthetic", a, jobs=[("synthetic", s) for s in seeds],
+        prefetch=False)   # synthetic data, nothing to download

@@ -1,5 +1,4 @@
-"""E04. Sensitivity of LPDS to the fitted partition, and tuned models
-(R2-7(a)).
+"""E04. Sensitivity of LPM to the fitted partition, and tuned models.
 
 Configurations, all fitted on the same split as the main experiments:
   sklearn one-at-a-time variations around Table 2 (number of trees, depth,
@@ -7,8 +6,9 @@ Configurations, all fitted on the same split as the main experiments:
   tuned by random search on the validation split (LightGBM and XGBoost with
   early stopping, scikit-learn over a coarser grid).
 For each configuration: test R^2 / RMSE, LPDS Spearman and PRR, the
-geometry baselines against the same model's errors, and optionally split CP,
-level-adjusted WLACP and Mondrian coverage.
+ambient-space baselines against the same model's errors. With --with_conformal,
+also split CP, WLACP with the raw leaf-agreement kernel and Mondrian coverage;
+these supplementary records are not used in the paper.
 """
 import os
 os.environ.setdefault("OMP_NUM_THREADS", "1")

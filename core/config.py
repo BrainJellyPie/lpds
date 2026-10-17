@@ -1,22 +1,22 @@
-"""Shared constants for the rebuttal experiments.
+"""Shared constants: datasets, splits, model settings and hyperparameter grids
+of the paper (Section V and Table 2).
 
-The values reproduce the protocol stated in the submitted manuscript
-(Section V and Table 2). The only protocol change is that the 10% of each
-dataset left unused by the 60/15/15 split is now an explicit validation
-split, used for hyperparameter selection of baselines (IBUG k, LoBoost
-region size, normalized-CP exponent, RBF bandwidth), for fixed LPDS quartile
-thresholds, and as the source of the extrapolation sets.
+Each dataset is split into training (60%), validation (10%), calibration
+(15%) and test (15%) sets. The validation split selects the hyperparameters
+of the baselines (IBUG k, LoBoost region size, normalized-CP exponent, RBF
+bandwidth), fixes the LPM quartile thresholds and supplies the source points
+of the extrapolation sets.
 """
 
 SEEDS = [42, 7, 13, 99, 2024]
 
-# The nine datasets of the submitted manuscript (file names of the
+# The nine core datasets (file names of the
 # inria-soda/tabular-benchmark "reg_num" collection).
 MAIN9 = [
     "Ailerons", "elevators", "cpu_act", "superconduct", "Bike_Sharing_Demand",
     "houses", "MiamiHousing2016", "pol", "sulfur",
 ]
-# Remaining numerical regression tasks of the same benchmark (option C1).
+# Remaining numerical regression tasks of the same benchmark.
 EXTRA10 = [
     "Brazilian_houses", "abalone", "delays_zurich_transport", "diamonds",
     "house_16H", "house_sales", "medical_charges", "nyc-taxi-green-dec-2016",
@@ -24,9 +24,6 @@ EXTRA10 = [
 ]
 ALL19 = MAIN9 + EXTRA10
 
-# The subset used by the submitted "extended comparison protocol".
-EXT6 = ["Ailerons", "elevators", "cpu_act", "superconduct",
-        "Bike_Sharing_Demand", "houses"]
 
 DISPLAY = {
     "Ailerons": "Ailerons", "elevators": "Elevators", "cpu_act": "CPU_act",
@@ -65,8 +62,8 @@ LOBOOST_M_GRID = [20, 50, 100]
 NCP_GAMMA_GRID = [0.25, 0.5, 1.0, 2.0]
 RBF_BW_GRID = [0.25, 0.5, 1.0, 2.0]      # multiples of the median distance
 
-# Leaf-agreement kernels compared for WLACP (Reviewer 2, comment 5(c)).
-# (kind, gamma): "la" is Eq. (6); "la_norm" divides each tree's indicator by
+# Leaf-agreement kernels compared for WLACP.
+# (kind, gamma): "la" is the leaf agreement LA; "la_norm" divides each tree's indicator by
 # the training population of the shared leaf (quantile-regression-forest
 # style per-tree normalization); gamma > 1 sharpens the kernel.
 WLACP_KERNELS = [("la", 1.0), ("la_norm", 1.0), ("la", 2.0), ("la", 4.0)]

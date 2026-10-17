@@ -1,4 +1,4 @@
-"""Numbers quoted in the revised manuscript that are not already in the
+"""Numbers quoted in the text of the paper that are not already in the
 tables of a01 to a03, written to <results>/tables/paper_numbers.json.
 
   python -m analysis.a04_paper_numbers --results results --results_all results_all
@@ -13,7 +13,9 @@ import pandas as pd
 from scipy.stats import spearmanr
 
 from analysis.a02_stats import compare
-from core.config import DISPLAY
+from core.config import ALPHA, DISPLAY
+
+TARGET = 1 - ALPHA  # nominal coverage
 
 
 def load(res, exp, group=None):
@@ -52,7 +54,7 @@ def cp_frame(res):
         rels.append(rel)
     rel = pd.concat(rels, ignore_index=True)
     cq = df[df.metric == "cov_q1"].copy()
-    cq["value"] = -np.abs(cq["value"] - 0.9)
+    cq["value"] = -np.abs(cq["value"] - TARGET)
     cq["metric"] = "cov_q1_close"
     return pd.concat([df, rel, cq], ignore_index=True)
 
@@ -90,7 +92,7 @@ def main():
         o["impl_positive"] = (ds_mean(imp, "spearman_LPDS") > 0).sum().astype(int).to_dict()
         # conformal: WLACP against every other interval method
         cpf = cp_frame(res)
-        comps = ["Split", "WLACP_submitted", "WLACP_LCP_la_g1", "Mondrian_LPDS4", "LoBoost", "LCP_RBF",
+        comps = ["Split", "WQ", "WLACP_LCP_la_g1", "Mondrian_LPDS4", "LoBoost", "LCP_RBF",
                  "NCP_LPDS", "NCP_ErrModel", "NCP_IBUG", "IBUG_Gaussian", "CQR", "CVplus", "NGBoost100",
                  "NGBoostES"]
         st = pd.concat([compare(cpf, "is_rel", "WLACP_LCP_la_norm_g1", comps, larger_better=False),
@@ -105,15 +107,15 @@ def main():
             ["metric", "method"]).mean().unstack(0).to_dict("index")
         q1 = ds_mean(cpf, "cov_q1")
         w = q1["WLACP_LCP_la_norm_g1"]
-        o["wlacp_q1_below_target"] = {DISPLAY.get(k, k): round(float(v), 4) for k, v in w[w < 0.9].items()}
+        o["wlacp_q1_below_target"] = {DISPLAY.get(k, k): round(float(v), 4) for k, v in w[w < TARGET].items()}
         o["wlacp_q1_min"] = round(float(w.min()), 4)
-        o["split_q1_below_target_n"] = int((q1["Split"] < 0.9).sum())
+        o["split_q1_below_target_n"] = int((q1["Split"] < TARGET).sum())
         o["split_q1_min"] = round(float(q1["Split"].min()), 4)
         o["width_q1_rel_split"] = ds_mean(cpf, "width_q1_rel").mean().to_dict()
         o["width_all_rel_split"] = ds_mean(cpf, "width_rel").mean().to_dict()
         o["n_datasets"] = int(len(sp))
         out[tag] = o
-    # calibration-size sweep for Ailerons (R2-6(d))
+    # calibration-size sweep for Ailerons
     cs = load(a.results, "e06_calib_size", "calib")
     x = cs[(cs.dataset == "Ailerons")]
     g = x.groupby(["method", "n_cal", "metric"]).value.agg(["mean", "std"])

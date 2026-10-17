@@ -1,9 +1,9 @@
-"""All manuscript figures, drawn from the stored result records.
+"""All figures of the paper, drawn from the stored result records.
 
   python -m analysis.f01_figures --results results --results_all results_all --out figures
 
 Each figure is written as a 600-dpi PNG together with a .txt file holding
-its caption, which the manuscript uses verbatim.
+its caption, which the paper uses verbatim.
 """
 import argparse
 import glob
@@ -20,7 +20,7 @@ from matplotlib.patches import FancyBboxPatch
 from analysis import figstyle as S
 from core.config import DISPLAY, MAIN9
 
-NAME = "LPM"     # name of the leaf-population score in the manuscript
+NAME = "LPM"     # name of the leaf-population score in the paper
 
 
 def load(res, exp, group=None):
@@ -141,7 +141,7 @@ def fig_ranking(R, RA, out):
     bx.set_xticklabels(["0", "0.3", "0.6", "0.9"])
     bx.set_xlabel("Fraction of predictions rejected")
     bx.set_ylabel("Retained MAE / MAE of all")
-    S.panel(bx, "b", "Rejection curves, 9 datasets")
+    S.panel(bx, "b", "Rejection curves, 9 core datasets")
     S.spread_labels(bx, 0.9, ends, texts, cols, x_text=0.735, gap_pt=8.2, size=7.2, weights=wts)
 
     # (c) benchmark-wide paired differences
@@ -168,7 +168,7 @@ def fig_ranking(R, RA, out):
     cx.set_ylim(len(comps) - 0.5, -1.1)
     cx.set_xlabel(f"ρ({NAME}) − ρ(baseline)")
     cx.grid(axis="y", visible=False)
-    S.panel(cx, "c", f"Paired gaps, {len(r19)} datasets")
+    S.panel(cx, "c", f"Paired gaps, {len(r19)} tasks")
     cap = (f"Deployment error ranking. (a) Spearman correlation between each risk score and the absolute error "
            f"of the deployed GBDT on the nine core datasets (mean and standard deviation over five seeds), "
            f"sorted by {NAME}. (b) Mean absolute error of the retained predictions after rejecting the "
@@ -233,7 +233,7 @@ def fig_quartile(R, RA, out):
     bx.set_ylim(-0.7, len(ra) - 0.3)
     bx.set_xlabel("Q1 / Q4 MAE ratio")
     bx.grid(axis="y", visible=False)
-    S.panel(bx, "b", f"All {len(ra)} datasets")
+    S.panel(bx, "b", f"All {len(ra)} tasks")
     cap = (f"Prediction error across {NAME} quartiles of the test set. (a) Mean absolute error in each quartile "
            f"divided by the mean absolute error of the whole test set on the nine core datasets (mean over five seeds); the "
            f"number above each group is the ratio between the lowest and the highest quartile. (b) The same ratio "
@@ -258,15 +258,15 @@ def fig_partition(R, RA, out):
     norm = Normalize(0.05, 0.27)
     cmap = LinearSegmentedColormap.from_list("b", S.BLUE_RAMP)
 
-    def tile(i, j, meth, top, default=False):
+    def tile(i, j, meth, top, default=False, width=0.9, top_size=6.6):
         v = mean.loc[meth, "spearman_LPDS"]
         col = cmap(norm(v))
-        ax.add_patch(FancyBboxPatch((j - 0.45, i - 0.42), 0.9, 0.84,
+        ax.add_patch(FancyBboxPatch((j - width / 2, i - 0.42), width, 0.84,
                                     boxstyle="round,pad=0,rounding_size=0.12",
                                     facecolor=col, edgecolor=S.INK if default else "none",
                                     lw=1.1 if default else 0, zorder=2))
         dark = norm(v) > 0.55
-        ax.text(j, i - 0.21, top, ha="center", va="center", fontsize=6.6,
+        ax.text(j, i - 0.21, top, ha="center", va="center", fontsize=top_size,
                 color="white" if dark else S.INK2, zorder=3)
         ax.text(j, i + 0.05, f"{v:.3f}", ha="center", va="center", fontsize=8.2,
                 color="white" if dark else S.INK, fontweight="semibold", zorder=3)
@@ -277,9 +277,10 @@ def fig_partition(R, RA, out):
         for j, v in enumerate(vals):
             meth = "sklearn:base" if v == base else f"sklearn:{k_}={v:g}"
             tile(i, j, meth, f"{v:g}", default=(v == base))
-    for j, (meth, lab) in enumerate([("sklearn:tuned", "sklearn"), ("xgb:tuned", "XGBoost"),
-                                     ("lgbm:tuned", "LightGBM")]):
-        tile(4, j, meth, lab)
+    # the three tuned libraries share the width of the four columns above
+    for x_, (meth, lab) in zip([0.17, 1.5, 2.83], [("sklearn:tuned", "scikit-learn"), ("xgb:tuned", "XGBoost"),
+                                                   ("lgbm:tuned", "LightGBM")]):
+        tile(4, x_, meth, lab, width=1.24, top_size=6.2)
     ax.set_xlim(-0.52, 3.52)
     ax.set_ylim(4.5, -0.5)
     ax.set_yticks(range(5))
@@ -345,7 +346,7 @@ def fig_partition(R, RA, out):
     cx.set_xlabel(f"Spearman ρ of {NAME}")
     cx.grid(axis="y", visible=False)
     cx.legend(loc="lower right", fontsize=6.8, handletextpad=0.1, borderaxespad=0.15, labelspacing=0.3)
-    S.panel(cx, "c", f"Libraries, all {len(order)} datasets")
+    S.panel(cx, "c", f"Libraries, all {len(order)} tasks")
     cap = (f"Dependence of {NAME} on the fitted partition. (a) Mean Spearman correlation between {NAME} and the "
            f"absolute error over the nine core datasets when one scikit-learn hyperparameter departs from the "
            f"default configuration, and for models tuned on the validation split; the bottom line of each tile "
@@ -480,7 +481,7 @@ def fig_heatmaps(R, out):
 # --------------------------------------------------------------------------
 CP = {"Split": ("Split CP", S.NEUTRAL, "o"),
       "Split_uncorrected": ("Split CP, rank n(1−α)", S.PALE, "o"),
-      "WLACP_submitted": ("Weighted quantile", S.LIGHT_BLUE, "s"),
+      "WQ": ("Weighted quantile", S.LIGHT_BLUE, "s"),
       "WLACP_LCP_la_g1": ("WLACP, raw LA kernel", S.RED, "h"),
       "Mondrian_LPDS4": (f"Mondrian, {NAME}", S.ORANGE, "s"),
       "LoBoost": ("LoBoost", S.AQUA, "D"),
@@ -488,7 +489,7 @@ CP = {"Split": ("Split CP", S.NEUTRAL, "o"),
       "NCP_LPDS": (f"NCP, {NAME} scale", S.MAGENTA, "v"),
       "NCP_ErrModel": ("NCP, error-model scale", S.VIOLET, "X"),
       "WLACP_LCP_la_norm_g1": ("WLACP", S.BLUE, "o")}
-MC_KEY = {"split": "Split", "split_uncorrected": "Split_uncorrected", "wlacp_submitted": "WLACP_submitted",
+MC_KEY = {"split": "Split", "split_uncorrected": "Split_uncorrected", "wq": "WQ",
           "wlacp_lcp_la_g1": "WLACP_LCP_la_g1", "wlacp_lcp_la_norm_g1": "WLACP_LCP_la_norm_g1"}
 
 
@@ -504,10 +505,10 @@ def cp_legend(fig, keys, ncol, extra=None):
 def fig_conformal(R, RA, out):
     cp = load(R, "e02_conformal", "cp")
     fig, (ax, bx, cx) = new_fig(3.05, [1.08, 1.32, 0.98])
-    cp_legend(fig, ["WLACP_LCP_la_norm_g1", "WLACP_LCP_la_g1", "WLACP_submitted", "Split", "Split_uncorrected",
+    cp_legend(fig, ["WLACP_LCP_la_norm_g1", "WLACP_LCP_la_g1", "WQ", "Split", "Split_uncorrected",
                     "Mondrian_LPDS4", "LoBoost", "LCP_RBF", "NCP_LPDS", "NCP_ErrModel"], ncol=5)
     qs = ["q1", "q2", "q3", "q4"]
-    for k_ in ["Split", "WLACP_submitted", "LoBoost", "Mondrian_LPDS4", "WLACP_LCP_la_norm_g1"]:
+    for k_ in ["Split", "WQ", "LoBoost", "Mondrian_LPDS4", "WLACP_LCP_la_norm_g1"]:
         lab, col, mk = CP[k_]
         yv = [ds_mean(cp, f"cov_{q}")[k_].mean() for q in qs]
         main = k_ == "WLACP_LCP_la_norm_g1"
@@ -522,7 +523,7 @@ def fig_conformal(R, RA, out):
     ax.set_ylim(0.83, 0.97)
     S.panel(ax, "a", f"Coverage by {NAME} quartile")
 
-    keys = ["WLACP_LCP_la_norm_g1", "NCP_ErrModel", "WLACP_LCP_la_g1", "WLACP_submitted", "LoBoost",
+    keys = ["WLACP_LCP_la_norm_g1", "NCP_ErrModel", "WLACP_LCP_la_g1", "WQ", "LoBoost",
             "NCP_LPDS", "Mondrian_LPDS4", "LCP_RBF"]
     pn = json.load(open(os.path.join(R, "tables", "paper_numbers.json")))
     for k, k_ in enumerate(keys):
@@ -551,7 +552,7 @@ def fig_conformal(R, RA, out):
 
     mc = json.load(open(os.path.join(R, "e10_coverage_check", "summary.json")))
     ns = sorted(int(k) for k in mc)
-    for mk_ in ["split_uncorrected", "wlacp_submitted", "split", "wlacp_lcp_la_g1", "wlacp_lcp_la_norm_g1"]:
+    for mk_ in ["split_uncorrected", "wq", "split", "wlacp_lcp_la_g1", "wlacp_lcp_la_norm_g1"]:
         lab, col, mk = CP[MC_KEY[mk_]]
         mu = np.array([mc[str(n)][mk_]["mean"] for n in ns])
         se = np.array([mc[str(n)][mk_]["mc_se"] for n in ns])
@@ -583,7 +584,7 @@ def fig_calibration(R, out):
     cs = load(R, "e06_calib_size", "calib")
     x = cs.groupby(["dataset", "method", "n_cal", "metric"]).value.mean()
     fig, axes = new_fig(2.75, [1, 1, 1])
-    keys = ["Split", "WLACP_submitted", "Mondrian_LPDS4", "WLACP_LCP_la_g1", "WLACP_LCP_la_norm_g1"]
+    keys = ["Split", "WQ", "Mondrian_LPDS4", "WLACP_LCP_la_g1", "WLACP_LCP_la_norm_g1"]
     cp_legend(fig, keys[::-1], ncol=5)
     for p, (metric, ylab, title) in enumerate([("cov_q1", "Coverage, lowest quartile", f"Lowest {NAME} quartile"),
                                                ("cov_all", "Coverage, full test set", "Full test set"),
@@ -610,7 +611,7 @@ def fig_calibration(R, out):
             ax.set_yscale("log")
             S.log_ticks(ax.yaxis, [1, 1.5, 2, 3, 5], ["1", "1.5", "2", "3", "5"])
         S.panel(ax, "abc"[p], title)
-    cap = (f"Effect of the calibration-set size, averaged over the nine core datasets and five seeds; bands show "
+    cap = (f"Effect of the calibration-set size, averaged over the nine core datasets (eight at 2000 points) and five seeds; bands show "
            f"the interquartile range over datasets and the dashed line marks the nominal level. (a) Coverage on "
            f"the lowest {NAME} quartile, (b) coverage on "
            f"the full test set and (c) mean interval width on the 25\\% of test points with the lowest {NAME}, "
@@ -819,7 +820,7 @@ def fig_timing(R, out):
     S.log_ticks(bx.xaxis, [10, 30, 100, 400])
 
     ncs = sorted(int(k) for k in t["by_ncal"])
-    ser = [("WLACP_LCP", "WLACP", S.BLUE, "o"), ("WLACP_submitted", "Weighted quantile", S.LIGHT_BLUE, "s"),
+    ser = [("WLACP_LCP", "WLACP", S.BLUE, "o"), ("WQ", "Weighted quantile", S.LIGHT_BLUE, "s"),
            ("LoBoost_fit", "LoBoost fit", S.AQUA, "D"), ("Mondrian", "Mondrian", S.ORANGE, "s")]
     lab = _timing_panel(cx, ncs, t["by_ncal"], ser, (170, 2000 * 6), (200, 2000), (0.012, 3000),
                         [0.1, 1, 10, 100, 1000])

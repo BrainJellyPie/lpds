@@ -1,4 +1,4 @@
-"""E06. Calibration-set size sweep with five seeds (R2-6(d), Tables 10-11).
+"""E06. Calibration-set size sweep over five random splits (Fig. 7 of the paper).
 
 The train, validation and test splits are those of the main protocol; the
 calibration set of size n_cal is drawn from the main calibration split plus
@@ -44,7 +44,7 @@ def job(ds, seed, args):
         htt = lf.self_kernel(c.L["test"])
         q_std = C.split_quantile(rc, a)
         res = {"Split": q_std,
-               "WLACP_submitted": C.wlacp_submitted(rc, Htc, a),
+               "WQ": C.weighted_quantile(rc, Htc, a),
                "WLACP_LCP_la_g1": C.wlacp_lcp(rc, Hcc, Htc, htt, a),
                "Mondrian_LPDS4": C.mondrian(rc, c.lpds_groups(lf.lpds(Lc)), g_te, a, 4)}
         Hn = lf.kernel(c.L["test"], Lc, "la_norm")

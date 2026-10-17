@@ -5,7 +5,7 @@ training split: the first three principal components (PC1, PC2, PC3) and
 the diagonal (1, ..., 1)/sqrt(d). Equal-displacement normalization: every
 direction moves a point by the same Euclidean distance in standardized
 space, equal to m times the standard deviation of the training data along
-PC1, so m = 3 on PC1 reproduces the main 3-sigma shift of the manuscript and
+PC1, so m = 3 on PC1 reproduces the main 3-sigma shift of the paper and
 the other directions are compared at the same displacement.
 """
 import numpy as np

@@ -31,10 +31,11 @@ def _sorted(r):
     return order, r[order]
 
 
-def wlacp_submitted(r_cal, H_tc, alpha):
-    """WLACP as in Definition 5 of the submitted manuscript: weights
-    normalized over the calibration points only, level 1 - alpha, and the
-    all-zero fallback to uniform weights."""
+def weighted_quantile(r_cal, H_tc, alpha):
+    """Plain kernel-weighted quantile of the calibration residuals, with the
+    weights normalized over the calibration points only, level 1 - alpha and
+    uniform weights when all weights are zero. It has no finite-sample
+    guarantee (Remark 1 of the paper) and serves as a baseline for WLACP."""
     order, rs = _sorted(r_cal)
     W = H_tc[:, order]
     tot = W.sum(axis=1)
