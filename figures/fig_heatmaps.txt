@@ -1,1 +1,0 @@
-AUROC of LPM for synthetic extrapolation at three training PC1 standard deviations along four directions with equal displacement length, for (a) scikit-learn, (b) XGBoost and (c) LightGBM ensembles on the nine core datasets (mean over five seeds).
